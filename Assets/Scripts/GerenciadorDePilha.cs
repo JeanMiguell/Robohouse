@@ -17,6 +17,9 @@ public class GerenciadorDePilha : MonoBehaviour
     private bool pilhaCriada = false;
     private bool memoriaAlocada = false;
     private bool pilhaCorreta = false;
+
+    private Stack<TipoBateria> pilhaLogica = new Stack<TipoBateria>();
+
     public AudioSource musicaDeFundo; // Referência ao áudio de fundo
 
     // Propriedade para acessar a estrutura da pilha
@@ -61,11 +64,12 @@ public GameObject EstruturaPilha => estruturaPilha;
         }
     }
 
-    public void ConfigurarPedido()
-    {
-        pedidoAtual = new List<string> { "BateriaEletrica", "BateriaSolar" };
-        Debug.Log($"Pedido configurado: {string.Join(", ", pedidoAtual)}");
-    }
+    public void ConfigurarPedido(List<string> baterias)
+{
+    pedidoAtual = baterias;
+    pilhaCorreta = false;
+    Debug.Log("Pedido configurado dinamicamente: " + string.Join(", ", baterias));
+}
 
     public void AlocarMemoria()
     {
@@ -99,19 +103,38 @@ public GameObject EstruturaPilha => estruturaPilha;
 
     if (novaBateria != null)
     {
+        // Define o tipo lógico
+        TipoBateria tipoBateria;
+
+        switch (tipo)
+        {
+            case "Solar":
+                tipoBateria = TipoBateria.Solar;
+                break;
+            case "Elétrica":
+                tipoBateria = TipoBateria.Eletrica;
+                break;
+            case "Nuclear":
+                tipoBateria = TipoBateria.Nuclear;
+                break;
+            default:
+                Debug.LogWarning("Tipo inválido para pilha lógica.");
+                return;
+        }
+
+        // Salva na pilha lógica (validação)
+        pilhaLogica.Push(tipoBateria);
+
+        // Salva na pilha visual (sprites)
         novaBateria.transform.SetParent(estruturaPilha.transform);
 
-        // Posição inicial elevada para a queda
-        Vector3 posicaoInicial = posicaoBaseAtual.position + new Vector3(0, 2f, 0); // Eleva 2 unidades no eixo Y
+        Vector3 posicaoInicial = posicaoBaseAtual.position + new Vector3(0, 2f, 0);
         novaBateria.transform.position = posicaoInicial;
 
-        // Calcula a posição final com base na pilha
         Vector3 posicaoFinal = posicaoBaseAtual.position + new Vector3(0, pilhaDeBaterias.Count * alturaBateria, 0);
 
-        // Atualiza a pilha antes da animação
         pilhaDeBaterias.Push(novaBateria);
 
-        // Inicia o efeito de queda
         StartCoroutine(EfeitoDeQueda(novaBateria, posicaoFinal));
 
         Debug.Log($"Bateria {tipo} empilhada na posição final: {posicaoFinal}");
@@ -125,42 +148,42 @@ public GameObject EstruturaPilha => estruturaPilha;
 
     public bool VerificarPilha()
 {
-    if (pedidoAtual == null)
-    {
-        Debug.LogWarning("Nenhum pedido configurado!");
+    if (pedidoAtual == null || pilhaLogica.Count != pedidoAtual.Count)
         return false;
-    }
 
-    if (pilhaDeBaterias.Count != pedidoAtual.Count)
-    {
-        Debug.Log("A pilha não corresponde ao pedido: tamanhos diferentes.");
-        return false;
-    }
+    TipoBateria[] baterias = pilhaLogica.ToArray();
 
-    GameObject[] baterias = pilhaDeBaterias.ToArray();
     for (int i = 0; i < baterias.Length; i++)
     {
-        string tipoBateria = baterias[i].name.Replace("(Clone)", "").Trim(); // Remove "(Clone)" do nome
-        if (tipoBateria != pedidoAtual[i])
+        if (baterias[i].ToString() != pedidoAtual[i])
         {
-            Debug.Log($"Erro na posição {i}: esperado {pedidoAtual[i]}, recebido {tipoBateria}.");
+            Debug.Log($"Erro na posição {i}: esperado {pedidoAtual[i]}, recebido {baterias[i]}");
             return false;
         }
     }
 
-    Debug.Log("A pilha criada corresponde ao pedido!");
     pilhaCorreta = true;
-
-    // Após verificar, destruímos o pedido visual
-    if (pedidoVisual != null)
-    {
-        Destroy(pedidoVisual);
-        pedidoVisual = null;
-    }
-
     return true;
 }
 
+public void ResetarTudo()
+{
+    foreach (var bateria in pilhaDeBaterias)
+        Destroy(bateria);
+
+    pilhaDeBaterias.Clear();
+    pilhaLogica.Clear();
+
+    estruturaPilha = null;
+    pedidoAtual = null;
+    pedidoVisual = null;
+
+    pilhaCriada = false;
+    memoriaAlocada = false;
+    pilhaCorreta = false;
+
+    Debug.Log("Reset geral concluído.");
+}
 
 
 

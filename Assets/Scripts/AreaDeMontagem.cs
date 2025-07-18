@@ -6,14 +6,22 @@ public class AreaDeMontagem : MonoBehaviour, IDropHandler
     public GerenciadorDePilha gerenciadorDePilha; // Referência ao script GerenciadorDePilha
 
     public void OnDrop(PointerEventData eventData)
+{
+    GameObject bloco = eventData.pointerDrag;
+
+    if (bloco != null)
     {
-        GameObject bloco = eventData.pointerDrag; // O objeto que foi arrastado
-        if (bloco != null)
-        {
-            Debug.Log($"Comando Solto: {bloco.name}");
-            ProcessarComando(bloco.name);
-        }
+        bloco.transform.SetParent(transform);
+        bloco.transform.localScale = Vector3.one;
+
+        // Garante que o bloco resete a posição relativa ao layout
+        bloco.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+
+        // ✅ Chama o processamento do comando
+        ProcessarComando(bloco.name);
     }
+}
+
 
     private void ProcessarComando(string comando)
     {
@@ -29,7 +37,7 @@ public class AreaDeMontagem : MonoBehaviour, IDropHandler
         {
             gerenciadorDePilha.EmpilharBateria("Solar");
         }
-        else if (comando == "PushEle    trica")
+        else if (comando == "PushEletrica")
         {
             gerenciadorDePilha.EmpilharBateria("Elétrica");
         }

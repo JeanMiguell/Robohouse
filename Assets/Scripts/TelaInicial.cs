@@ -9,6 +9,8 @@ public class MenuInicial : MonoBehaviour
     public GameObject painelOpcoes; // Painel de opções
     private bool musicaAtiva = true; // Controle do estado da música
 
+    GLBoard gLBoard;
+
     private void Start()
     {
         // Tocar a música de fundo ao iniciar o menu
@@ -20,9 +22,13 @@ public class MenuInicial : MonoBehaviour
     }
 
     // Função chamada ao clicar no botão "Start"
-    public void IniciarJogo()
+    async void IniciarJogo()
     {
-        TocarSomClique(); // Toca o efeito sonoro do botão
+        TocarSomClique();
+        GLBoard gLBoard = new GLBoard("MxsgS8uiKX23BTS3VLeXDw", SystemInfo.deviceUniqueIdentifier);
+        await gLBoard.LOAD_USER_DATA();
+        gLBoard.SetCustomReport("Esse jogador tem dificuldades com as coisas"); // Toca o efeito sonoro do botão
+        StartCoroutine(gLBoard.SEND_USER_DATA());
         SceneManager.LoadScene("Login"); // Carrega a cena "Login"
     }
 

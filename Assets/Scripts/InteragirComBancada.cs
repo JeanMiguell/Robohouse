@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Linq;
+
 
 public class InteragirComBancada : MonoBehaviour
 {
@@ -7,10 +9,8 @@ public class InteragirComBancada : MonoBehaviour
     private bool pertoDaCabine = false;  // Verifica se o jogador está perto da cabine
     public GerenciadorDePilha gerenciadorDePilha;
     public GameObject pedidoVisual; // O pedido visual na tela principal
-    private bool pedidoEntregue = true; // Controle para saber se um pedido pode ser coletado
-    private bool pertoDaBancada = false; 
-
-
+    public PedidosDaFase pedidosDaFase; // Referência ao ScriptableObject
+    private int proximoPedidoIndex = 0; // Controle interno
 
     void Update()
     {
@@ -45,60 +45,60 @@ public class InteragirComBancada : MonoBehaviour
     // Função para criar o pedido
     void CriarPedido()
 {
-    if (prefabPedido == null)
+    if (proximoPedidoIndex >= pedidosDaFase.pedidosDisponiveis.Length)
     {
-        Debug.LogError("PrefabPedido não foi atribuído no Inspector!");
+        Debug.Log("Todos os pedidos foram coletados.");
         return;
     }
 
-    if (pedidoAtual != null)
-    {
-        Debug.LogWarning("Um pedido já foi criado! Não é possível criar outro enquanto o atual não for entregue.");
-        return;
-    }
-
-    if (!pedidoEntregue) // Garante que o jogador só possa coletar um novo pedido após entregar o anterior
-    {
-        Debug.LogWarning("Ainda há um pedido ativo! Entregue o pedido atual antes de coletar outro.");
-        return;
-    }
-
-    // Cria o pedido na posição desejada
+    // Instancia o visual do pedido na posição definida
     pedidoAtual = Instantiate(prefabPedido, new Vector3(3.32f, 3.36f, 0), Quaternion.identity);
 
-    // Exibe o pedido na tela
-    pedidoAtual.SetActive(true);
-
-    // Configura o pedido como visual no Gerenciador de Pilha
-    if (gerenciadorDePilha != null)
+    // Pega o componente Pedido
+    Pedido pedido = pedidoAtual.GetComponent<Pedido>();
+    
+    if (pedido != null)
     {
-        gerenciadorDePilha.pedidoVisual = pedidoAtual;
-        gerenciadorDePilha.ConfigurarPedido();
-    }
+        // Pega os dados do ScriptableObject
+        TipoBateria[] bateriasDoPedido = pedidosDaFase.pedidosDisponiveis[proximoPedidoIndex].baterias;
 
-    // Marca o pedido como em andamento
-    pedidoEntregue = false;
+        if (bateriasDoPedido == null || bateriasDoPedido.Length == 0)
+        {
+            Debug.LogError("O pedido configurado no ScriptableObject está vazio!");
+            return;
+        }
 
-    // Confirmação de que o pedido foi criado
-    if (pedidoAtual != null)
-    {
-        Debug.Log("Pedido criado com sucesso!");
+        // Define as baterias no visual e avança pro próximo
+        pedido.tiposDeBaterias = bateriasDoPedido;
+        proximoPedidoIndex++;
+
+        // Conecta com o Gerenciador de Pilha
+        if (gerenciadorDePilha != null)
+        {
+            gerenciadorDePilha.pedidoVisual = pedidoAtual;
+            gerenciadorDePilha.ConfigurarPedido(bateriasDoPedido.Select(b => b.ToString()).ToList());
+        }
+        else
+        {
+            Debug.LogError("GerenciadorDePilha não está atribuído no Inspector.");
+        }
     }
     else
     {
-        Debug.LogError("Falha ao instanciar o pedido!");
+        Debug.LogError("O prefab do pedido não possui o script Pedido.cs.");
     }
 }
 
+
 public void PedidoEntregue()
 {
-    pedidoEntregue = true; // Permitir que o jogador colete outro pedido
     if (pedidoAtual != null)
     {
-        Destroy(pedidoAtual); // Destroi o pedido atual após entrega
+        Destroy(pedidoAtual);
         pedidoAtual = null;
     }
-    Debug.Log("Pedido entregue e pronto para coletar outro.");
-}   
+
+    Debug.Log("Pedido entregue e liberado para novo pedido.");
+}
 
 }
