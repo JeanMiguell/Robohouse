@@ -22,13 +22,9 @@ public class MenuInicial : MonoBehaviour
     }
 
     // Função chamada ao clicar no botão "Start"
-    async void IniciarJogo()
+    public void IniciarJogo()
     {
         TocarSomClique();
-        GLBoard gLBoard = new GLBoard("MxsgS8uiKX23BTS3VLeXDw", SystemInfo.deviceUniqueIdentifier);
-        await gLBoard.LOAD_USER_DATA();
-        gLBoard.SetCustomReport("Esse jogador tem dificuldades com as coisas"); // Toca o efeito sonoro do botão
-        StartCoroutine(gLBoard.SEND_USER_DATA());
         SceneManager.LoadScene("Login"); // Carrega a cena "Login"
     }
 
