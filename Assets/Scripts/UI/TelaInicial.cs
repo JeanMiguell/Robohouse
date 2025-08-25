@@ -9,8 +9,6 @@ public class MenuInicial : MonoBehaviour
     public GameObject painelOpcoes; // Painel de opções
     private bool musicaAtiva = true; // Controle do estado da música
 
-    GLBoard gLBoard;
-
     private void Start()
     {
         // Tocar a música de fundo ao iniciar o menu

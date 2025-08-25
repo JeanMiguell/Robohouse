@@ -21,10 +21,8 @@ public class GerenciadorDePilha : MonoBehaviour
 
     private Stack<TipoBateria> pilhaLogica = new Stack<TipoBateria>();
 
-    public AudioSource musicaDeFundo; // Referência ao áudio de fundo
-
-    // Propriedade para acessar a estrutura da pilha
-public GameObject EstruturaPilha => estruturaPilha;
+    public AudioSource musicaDeFundo;
+    public GameObject EstruturaPilha => estruturaPilha;
 
     private float alturaBateria = 3f;
     private List<string> pedidoAtual;

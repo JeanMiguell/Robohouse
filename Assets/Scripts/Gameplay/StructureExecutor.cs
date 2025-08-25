@@ -29,11 +29,9 @@ namespace RoboHouse.Gameplay
         private bool memoriaAlocada = false;
         private bool pilhaCorreta = false;
         private List<string> pedidoAtual;
-
-        // 🔧 Propriedade usada externamente para validar o pedido
+        
         public GameObject PedidoVisual { get; set; }
 
-        // ✅ Acesso externo para InteragirComCabine
         public GameObject EstruturaPilha => estruturaPilha;
         public Transform PosicaoEntrega => posicaoEntrega;
         public Transform PosicaoBasePrincipal => posicaoBasePilhaPrincipal;
